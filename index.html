@@ -1,0 +1,221 @@
+<!DOCTYPE html><html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNS 사이버범죄 퀴즈</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --surface2: #1a2236;
+  --border: #1e3a5f;
+  --accent: #00d4ff;
+  --accent2: #ff6b35;
+  --accent3: #7c3aed;
+  --correct: #10b981;
+  --wrong: #ef4444;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --glow: 0 0 20px rgba(0,212,255,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Noto Sans KR',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  background-image:radial-gradient(ellipse at 20% 20%, rgba(0,212,255,0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(124,58,237,0.05) 0%, transparent 60%);
+}
+.grid-bg{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  background-image:linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size:40px 40px;
+}
+.container{max-width:760px;margin:0 auto;padding:20px;position:relative;z-index:1}
+.screen{display:none;animation:fadeIn .4s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.intro-header{text-align:center;padding:60px 0 40px}
+.badge{
+  display:inline-block;
+  background:linear-gradient(135deg, rgba(0,212,255,0.15), rgba(124,58,237,0.15));
+  border:1px solid var(--accent);
+  color:var(--accent);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:3px;
+  padding:6px 16px;
+  border-radius:20px;
+  margin-bottom:24px;
+  text-transform:uppercase;
+}
+.intro-title{
+  font-family:'Black Han Sans',sans-serif;
+  font-size:clamp(28px,6vw,52px);
+  line-height:1.15;
+  margin-bottom:16px;
+  background:linear-gradient(135deg,#ffffff 0%, var(--accent) 60%, var(--accent3) 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.intro-sub{color:var(--muted);font-size:15px;line-height:1.7;max-width:500px;margin:0 auto 40px}
+.info-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:40px}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 16px;text-align:center}
+.info-card .icon{font-size:24px;margin-bottom:8px}
+.info-card .label{font-size:12px;color:var(--muted);margin-bottom:4px}
+.info-card .value{font-size:18px;font-weight:700;color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 36px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent3));color:white;box-shadow:var(--glow)}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-full{width:100%}
+.quiz-header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 24px;gap:16px}
+.progress-wrap{flex:1}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+.progress-bar{height:4px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));transition:width .4s}
+.score-badge{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:700;color:var(--accent)}
+.category-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);padding:4px 12px;border-radius:20px;margin-bottom:16px}
+.question-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px}
+.question-num{font-size:11px;color:var(--muted);margin-bottom:12px}
+.question-text{font-size:clamp(16px,2.5vw,20px);font-weight:700;line-height:1.6;color:white}
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.option{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:14px;font-size:15px;line-height:1.5}
+.option:hover:not(.disabled){border-color:var(--accent);background:rgba(0,212,255,0.06);transform:translateX(4px)}
+.option .opt-letter{min-width:28px;height:28px;border-radius:6px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted)}
+.option.correct{border-color:var(--correct);background:rgba(16,185,129,0.1)}
+.option.correct .opt-letter{background:var(--correct);color:white}
+.option.wrong{border-color:var(--wrong);background:rgba(239,68,68,0.1)}
+.option.wrong .opt-letter{background:var(--wrong);color:white}
+.option.disabled{cursor:default}
+.feedback-box{border-radius:12px;padding:20px 24px;font-size:14px;line-height:1.7;margin-bottom:20px;display:none;border-left:4px solid}
+.feedback-box.correct-fb{background:rgba(16,185,129,0.1);border-color:var(--correct)}
+.feedback-box.wrong-fb{background:rgba(239,68,68,0.08);border-color:var(--wrong)}
+.feedback-box.show{display:block}
+.result-hero{text-align:center;padding:48px 0 32px}
+.action-row{display:flex;gap:12px;flex-wrap:wrap;padding:32px 0 60px;justify-content:center}
+.share-box{
+  background:linear-gradient(135deg, rgba(0,212,255,0.08), rgba(124,58,237,0.08));
+  border:1px solid rgba(0,212,255,0.25);
+  border-radius:16px;
+  padding:24px;
+  margin:24px 0;
+  text-align:center;
+}
+.share-title{font-size:18px;font-weight:800;margin-bottom:10px}
+.share-desc{font-size:14px;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.share-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.copy-alert{
+  margin-top:12px;
+  font-size:13px;
+  color:#34d399;
+  display:none;
+}
+@media (max-width:600px){
+  .question-card{padding:20px}
+  .option{padding:12px 16px}
+  .info-cards{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="container"><div id="screen-intro" class="screen active">
+  <div class="intro-header">
+    <div class="badge">🔐 SNS 사이버범죄 퀴즈</div>
+    <div class="intro-title">SNS 사이버범죄<br>나는 얼마나 알고 있을까?</div>
+    <p class="intro-sub">퀴즈를 풀고 나면 유형별 교육 자료로 사이버범죄를 더 깊이 이해할 수 있어요.</p><div class="info-cards">
+  <div class="info-card"><div class="icon">📝</div><div class="label">문제 수</div><div class="value">10문항</div></div>
+  <div class="info-card"><div class="icon">⏱</div><div class="label">소요 시간</div><div class="value">약 5분</div></div>
+  <div class="info-card"><div class="icon">🎓</div><div class="label">결과 제공</div><div class="value">맞춤 교육</div></div>
+</div>
+
+<button class="btn btn-primary" onclick="startQuiz()">테스트 시작하기 →</button>
+
+  </div>
+</div><div id="screen-quiz" class="screen">
+  <div class="quiz-header">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="prog-text">1 / 10</span>
+        <span id="prog-pct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="score-badge">점수 <span id="live-score">0</span>점</div>
+  </div>  <div id="category-tag" class="category-tag"></div>  <div class="question-card">
+    <div class="question-num" id="q-num"></div>
+    <div class="question-text" id="q-text"></div>
+  </div>  <div class="options" id="options-list"></div>  <div class="feedback-box" id="feedback-box">
+    <div id="fb-content"></div>
+  </div><button class="btn btn-primary btn-full" id="next-btn" onclick="nextQuestion()" style="display:none">다음 문제 →</button>
+
+</div><div id="screen-result" class="screen">
+  <div class="result-hero">
+    <h1 id="final-title">결과 분석 완료</h1>
+    <h2 style="margin-top:12px;font-size:42px;color:var(--accent)"><span id="final-score">0</span>점</h2>
+    <p style="margin-top:10px;color:var(--muted)" id="final-message"></p>
+  </div>  <div class="share-box">
+    <div class="share-title">📲 결과 공유하기</div>
+    <div class="share-desc">
+      친구들에게 자신의 보안 인식 수준을 공유해보세요.
+    </div><div class="share-buttons">
+  <button class="btn btn-primary" onclick="shareResult()">결과 공유</button>
+  <button class="btn btn-outline" onclick="copyLink()">링크 복사</button>
+</div>
+
+<div class="copy-alert" id="copy-alert">
+  ✅ 링크가 복사되었습니다.
+</div>
+
+  </div>  <div class="action-row">
+    <button class="btn btn-outline" onclick="restartQuiz()">🔄 다시 풀기</button>
+  </div>
+</div></div><script>
+const QUESTIONS=[{id:1,category:"피싱 & 계정 보안",icon:"🎣",question:"친구로부터 메시지가 왔습니다. \"계정이 정지됩니다. 여기를 클릭해서 인증해주세요\" 라는 링크가 포함되어 있습니다. 어떻게 해야 할까요?",options:["빨리 클릭해서 계정을 보호한다","전화나 다른 방법으로 친구에게 직접 확인한다","링크를 다른 친구에게 공유해서 확인을 부탁한다","일단 클릭해보고 이상하면 닫는다"],answer:1,explanation:"이는 피싱(Phishing)의 전형적인 수법입니다. '긴급', '인증', '정지' 같은 표현으로 즉각 반응을 유도합니다. 반드시 다른 채널(전화, 실제 앱 로그인)로 직접 확인해야 합니다. 출처 불명 링크는 절대 클릭하지 마세요.",edu:"phishing"},{id:2,category:"계정 보안",icon:"🔑",question:"2단계 인증(2FA)에 대한 설명 중 올바른 것은?",options:["비밀번호가 강하면 2단계 인증은 필요 없다","불편하더라도 중요 계정에는 반드시 설정하는 것이 좋다","문자로 받는 인증번호를 타인과 공유해도 된다","2단계 인증을 설정하면 계정이 100% 안전하다"],answer:1,explanation:"2단계 인증은 비밀번호가 유출되더라도 추가 보호막이 됩니다.",edu:"account"},{id:3,category:"투자 사기",icon:"💰",question:"SNS에서 '원금 보장, 월 30% 수익 보장'이라는 투자 리딩방 초대를 받았습니다. 어떻게 판단해야 할까요?",options:["수익 인증이 많으니 믿을 수 있다","일단 소액으로 테스트해본다","원금·수익 보장은 불가능하므로 사기 가능성이 매우 높다","유명 사람이 운영하면 안전하다"],answer:2,explanation:"고수익·원금보장은 대표적인 투자 사기 패턴입니다.",edu:"invest"},{id:4,category:"로맨스 스캠",icon:"💔",question:"SNS에서 알게 된 사람이 갑자기 돈이 급하다고 합니다. 어떻게 해야 할까요?",options:["믿고 송금한다","로맨스 스캠을 의심한다","소액이면 괜찮다","계좌만 확인하면 안전하다"],answer:1,explanation:"실제 만남 없이 금전을 요구하면 반드시 의심해야 합니다.",edu:"romance"},{id:5,category:"명예훼손",icon:"⚖️",question:"허위 사실을 SNS에 게시하면 어떻게 될 수 있을까요?",options:["익명이면 괜찮다","법적 처벌 가능","삭제하면 끝난다","비공개 계정이면 안전하다"],answer:1,explanation:"온라인 명예훼손은 형사처벌 대상이 될 수 있습니다.",edu:"defamation"},{id:6,category:"불법 촬영물",icon:"📸",question:"불법 촬영 영상을 재전송하면 어떻게 될까요?",options:["문제없다","처벌될 수 있다","원본 올린 사람만 책임진다","삭제하면 괜찮다"],answer:1,explanation:"불법 촬영물 재유포도 처벌 대상입니다.",edu:"illegal_content"},{id:7,category:"개인정보 보호",icon:"🛡",question:"SNS에 공개해도 비교적 안전한 정보는?",options:["전화번호","취미 정보","학교 이름","가족 사진"],answer:1,explanation:"개인 식별 정보는 최소화해야 합니다.",edu:"privacy"},{id:8,category:"AI & 딥페이크",icon:"🤖",question:"타인 얼굴 사진을 AI 합성 서비스에 업로드하면?",options:["문제없다","개인정보 침해 가능","재미면 괜찮다","공개사진이면 안전하다"],answer:1,explanation:"동의 없는 AI 합성은 법적 문제가 될 수 있습니다.",edu:"deepfake"},{id:9,category:"피해 대응",icon:"🚨",question:"사기 피해를 당했을 때 가장 먼저 해야 할 일은?",options:["혼자 해결","증거 보존 및 신고","SNS 공개","차단만 한다"],answer:1,explanation:"증거 캡처와 금융기관 신고가 가장 중요합니다.",edu:"response"},{id:10,category:"자가 점검",icon:"🔍",question:"사이버 범죄에 해당할 수 있는 행동은?",options:["허위 게시물 공유","2단계 인증","링크 의심","개인정보 최소화"],answer:0,explanation:"허위 정보 유포는 법적 문제가 될 수 있습니다.",edu:"selfcheck"}];
+
+const EDU_DATA={
+phishing:{title:"피싱 범죄",content:"피싱은 링크 클릭을 유도해 개인정보를 탈취하는 범죄입니다."},
+account:{title:"계정 보안",content:"2단계 인증과 강력한 비밀번호 사용이 중요합니다."},
+invest:{title:"투자 사기",content:"원금 보장·고수익 보장은 대표적 사기 수법입니다."},
+romance:{title:"로맨스 스캠",content:"온라인에서 급하게 금전을 요구하면 의심해야 합니다."},
+defamation:{title:"사이버 명예훼손",content:"온라인 허위사실 유포는 처벌 대상입니다."},
+illegal_content:{title:"불법 촬영물",content:"재전송과 저장도 처벌될 수 있습니다."},
+privacy:{title:"개인정보 보호",content:"전화번호·위치 정보 공개를 최소화하세요."},
+deepfake:{title:"딥페이크",content:"동의 없는 AI 합성은 법적 문제가 됩니다."},
+response:{title:"피해 대응",content:"증거 캡처 후 즉시 신고 및 지급정지를 요청하세요."},
+selfcheck:{title:"디지털 자가 점검",content:"공유 전 사실 여부와 법적 문제를 확인하세요."}
+};
+
+let currentQ=0,score=0,answers=[],answered=false;
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});} 
+
+function startQuiz(){currentQ=0;score=0;answers=[];renderQuestion();showScreen('quiz');}
+
+function renderQuestion(){answered=false;const q=QUESTIONS[currentQ];document.getElementById('prog-text').textContent=`${currentQ+1} / ${QUESTIONS.length}`;const pct=Math.round((currentQ/QUESTIONS.length)*100);document.getElementById('prog-pct').textContent=pct+'%';document.getElementById('prog-fill').style.width=pct+'%';document.getElementById('live-score').textContent=score;document.getElementById('category-tag').innerHTML=`${q.icon} ${q.category}`;document.getElementById('q-num').textContent=`문제 ${currentQ+1}`;document.getElementById('q-text').textContent=q.question;const letters=['A','B','C','D'];document.getElementById('options-list').innerHTML=q.options.map((opt,i)=>`<div class="option" onclick="selectOption(${i})"><div class="opt-letter">${letters[i]}</div><div>${opt}</div></div>`).join('');document.getElementById('feedback-box').className='feedback-box';document.getElementById('next-btn').style.display='none';}
+
+function selectOption(idx){if(answered)return;answered=true;const q=QUESTIONS[currentQ];const correct=q.answer===idx;if(correct)score+=10;answers.push({q,chosen:idx,correct});document.querySelectorAll('.option').forEach((el,i)=>{el.classList.add('disabled');if(i===q.answer)el.classList.add('correct');if(i===idx&&!correct)el.classList.add('wrong');});const fb=document.getElementById('feedback-box');fb.className='feedback-box show '+(correct?'correct-fb':'wrong-fb');document.getElementById('fb-content').textContent=q.explanation;document.getElementById('live-score').textContent=score;document.getElementById('next-btn').style.display='flex';}
+
+function nextQuestion(){currentQ++;if(currentQ>=QUESTIONS.length){showResult();}else{renderQuestion();}}
+
+function showResult(){showScreen('result');const finalScore=Math.round((score/(QUESTIONS.length*10))*100);document.getElementById('final-score').textContent=finalScore;document.getElementById('final-message').textContent=finalScore>=80?'🛡 보안 인식 수준이 높습니다':'⚠ 추가 보안 교육이 필요합니다';const wrongItems=answers.filter(a=>!a.correct);const eduArea=document.getElementById('edu-sections');if(eduArea){eduArea.innerHTML=wrongItems.map(a=>`<div class="edu-section open"><div class="edu-header"><div class="edu-title">${EDU_DATA[a.q.edu].title}</div></div><div class="edu-body" style="display:block;padding:16px">${EDU_DATA[a.q.edu].content}</div></div>`).join('');}}
+
+async function shareResult(){const score=document.getElementById('final-score').textContent;const shareText=`🛡 SNS 사이버범죄 퀴즈 결과
+
+내 점수는 ${score}점!
+당신도 테스트해보세요.`;if(navigator.share){try{await navigator.share({title:'SNS 사이버범죄 퀴즈',text:shareText,url:window.location.href});}catch(err){console.log(err);}}else{copyLink();alert('공유 기능 미지원으로 링크를 복사했습니다.');}}
+
+function copyLink(){navigator.clipboard.writeText(window.location.href);const alertBox=document.getElementById('copy-alert');if(alertBox){alertBox.style.display='block';setTimeout(()=>{alertBox.style.display='none';},2000);}}
+
+function restartQuiz(){startQuiz();}
+</script></body>
+</html>
